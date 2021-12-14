@@ -3,6 +3,7 @@ import json
 from datetime import datetime,timedelta
 from aliexpress import api,appinfo
 from bs4 import BeautifulSoup
+
 url = 'gw.api.taobao.com'
 port = 80
 appkey = ''
@@ -15,7 +16,6 @@ dateFrom = str(now - timedelta(days=1))
 def get_sells():
      req = api.AliexpressSolutionOrderGetRequest(url, port)
      req.set_app_info(appinfo(appkey, secret))
-
      req.param0 = {
      'create_date_start': (datetime.now() - timedelta(1)).strftime('%Y-%m-%d') + ' 00:00:01',
      'create_date_end': (datetime.now() - timedelta(1)).strftime('%Y-%m-%d') + ' 24:00:00',
@@ -23,9 +23,9 @@ def get_sells():
      'current_page': 1
      }
      resp = req.getResponse(sessionkey)
+     
      with open('dsa.json','w', encoding='utf-8') as file:
           json.dump(resp, file, indent=4, ensure_ascii=False)
-
      with open('dsa.json', 'r', encoding='utf-8') as file:
           file_content = file.read()
      soup = BeautifulSoup(file_content, 'html.parser')
@@ -43,7 +43,6 @@ def get_sells():
                          data_sells_count[z['product_id']] = z['product_count']
                     else:
                          data_sells_count[z['product_id']] += z['product_count']
-
      except:
           print('Заказов вчера не было')
      for z in sku_id:
@@ -52,6 +51,7 @@ def get_sells():
           if z not in data_sells_count:
                data_sells_count[z] = 0
      return data_sells_count, data_sells_rub
+
 def data_stock():
      stick = []
      req2 = api.AliexpressSolutionProductInfoGetRequest(url, port)
@@ -62,7 +62,6 @@ def data_stock():
           stick.append(resp2)
      with open('dsa2.json','w', encoding='utf-8') as file:
           json.dump(stick, file, indent=4, ensure_ascii=False)
-
      with open('dsa2.json', encoding='utf-8') as file:
          conten = file.read()
      soup = BeautifulSoup(conten, 'html.parser')
@@ -72,8 +71,8 @@ def data_stock():
          for z in i['aliexpress_solution_product_info_get_response']['result']['aeop_ae_product_s_k_us']['global_aeop_ae_product_sku']:
              value_count_sklad.append(z['ipm_sku_stock'])
      values_id = dict(zip(sku_id,value_count_sklad))
-
      return values_id
+
 def scraping_info():
      sells_count = get_sells()[0]
      sells_sum = get_sells()[1]
@@ -88,7 +87,7 @@ def scraping_info():
 
           })
      with open('json_ali.json', 'w', encoding='utf-8') as file:
-          json.dump(slu,file ,ensure_ascii=4, indent=False)
+          json.dump(slu,file ,ensure_ascii=False, indent=4)
 def insert_DB():
      connection = pymysql.connect('')
      with open('json_ali.json', encoding='utf-8') as file:
